@@ -211,7 +211,7 @@
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Category</label>
                         <select id="form-purpose" class="w-full border border-slate-200 rounded-2xl px-5 py-4 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all font-bold text-sm bg-white">
-                            <option>Lift Maintenance</option>
+                            <option>New Lift</option>
                             <option>Security Fund</option>
                             <option>Water Charges</option>
                             <option>General Corpus</option>
@@ -516,7 +516,7 @@
             
             document.getElementById('form-name').value = data.name || '';
             document.getElementById('form-amount').value = data.amount || 20000;
-            document.getElementById('form-purpose').value = data.purpose || 'Lift Maintenance';
+            document.getElementById('form-purpose').value = data.purpose || 'New Lift ';
             document.getElementById('form-date').value = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
             
             // Re-store original ID for saving
