@@ -3,128 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apartment Maintenance Dashboard</title>
+    <title>Premium Apartment Maintenance Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .flat-cell { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .flat-cell:hover { transform: translateY(-2px); }
-        .modal-overlay { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); }
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 220px;
-            background-color: #1e293b;
-            color: #fff;
-            text-align: left;
-            border-radius: 8px;
-            padding: 12px;
-            position: absolute;
-            z-index: 50;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -110px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --glass: rgba(255, 255, 255, 0.85);
         }
-        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(135deg, #f0f4ff 0%, #fff1eb 100%);
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        .flat-cell {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flat-cell:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-overlay {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            color: #4f46e5;
+            background: rgba(79, 70, 229, 0.05);
+        }
     </style>
 </head>
-<body class="text-slate-800">
+<body class="text-slate-900 antialiased pb-20">
 
-    <div class="max-w-7xl mx-auto px-4 py-8">
-        
-        <!-- Header -->
-        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Apartment Maintenance</h1>
-                <div class="flex items-center gap-2 text-slate-500">
-                    <span class="flex h-2 w-2 rounded-full bg-emerald-500"></span>
-                    <p class="text-sm font-medium">Live Supabase Sync Active</p>
+    <!-- Navigation Bar -->
+    <nav class="sticky top-0 z-50 w-full glass-card border-b border-white/20 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-2">
+                    <div class="bg-indigo-600 p-1.5 rounded-xl">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="font-extrabold text-lg tracking-tight text-slate-900">Swarna Residency</span>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <a href="https://swarnaresidencyyy.netlify.app/" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-slate-600 nav-link border border-transparent hover:border-indigo-100">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                        Monthly Expenditure Report
+                    </a>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="exportToPDF()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-100 font-semibold transition-all">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                    Export PDF Report
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header Section -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+            <div class="space-y-1">
+                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Maintenance Dashboard</h1>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="relative flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Database Live Sync</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <button onclick="exportToPDF()" class="group flex items-center gap-3 bg-slate-900 hover:bg-black text-white px-6 py-3.5 rounded-2xl shadow-xl transition-all active:scale-95">
+                    <i data-lucide="file-text" class="w-5 h-5 text-indigo-400 group-hover:rotate-12 transition-transform"></i>
+                    <span class="font-bold">Generate PDF Report</span>
                 </button>
             </div>
         </header>
 
-        <!-- Dashboard Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative tooltip group cursor-help">
-                <p class="text-sm font-medium text-slate-500 mb-1">Total Revenue</p>
-                <h3 class="text-3xl font-bold text-emerald-600" id="stat-total-amount">₹0</h3>
-                <div class="tooltiptext border border-slate-700">
-                    <p class="text-xs font-bold text-indigo-400 mb-2 border-b border-slate-700 pb-1 uppercase tracking-wider">Breakdown</p>
-                    <div id="breakdown-details" class="text-xs space-y-2">
-                        <!-- Breakdown injected here -->
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="glass-card p-6 rounded-[2.5rem] relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 bg-emerald-50 w-24 h-24 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
+                <div class="relative z-10">
+                    <div class="bg-emerald-100 w-10 h-10 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="indian-rupee" class="w-5 h-5 text-emerald-600"></i>
+                    </div>
+                    <p class="text-sm font-bold text-slate-500 uppercase tracking-tight">Total Collection</p>
+                    <h3 class="text-4xl font-extrabold text-slate-900 mt-1" id="stat-total-amount">₹0</h3>
+                    <div id="breakdown-details" class="mt-4 pt-4 border-t border-slate-100 text-xs font-medium text-slate-400 space-y-1"></div>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 rounded-[2.5rem] relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 bg-emerald-50 w-24 h-24 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
+                <div class="relative z-10">
+                    <div class="bg-emerald-100 w-10 h-10 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
+                    </div>
+                    <p class="text-sm font-bold text-slate-500 uppercase tracking-tight">Paid Units</p>
+                    <h3 class="text-4xl font-extrabold text-slate-900 mt-1" id="stat-total-paid">0</h3>
+                    <p class="text-xs text-slate-400 mt-4 pt-4 border-t border-slate-100">Across both blocks</p>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 rounded-[2.5rem] relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 bg-rose-50 w-24 h-24 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
+                <div class="relative z-10">
+                    <div class="bg-rose-100 w-10 h-10 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="clock" class="w-5 h-5 text-rose-600"></i>
+                    </div>
+                    <p class="text-sm font-bold text-slate-500 uppercase tracking-tight">Pending Units</p>
+                    <h3 class="text-4xl font-extrabold text-rose-500 mt-1" id="stat-pending">0</h3>
+                    <div class="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2">
+                        <div class="h-1.5 flex-1 bg-slate-100 rounded-full overflow-hidden">
+                            <div id="collection-progress-bar" class="h-full bg-emerald-500 transition-all duration-1000" style="width: 0%"></div>
+                        </div>
+                        <span id="collection-percent" class="text-[10px] font-black text-slate-400">0%</span>
                     </div>
                 </div>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-sm font-medium text-slate-500 mb-1">Total Paid Flats</p>
-                <h3 class="text-3xl font-bold text-slate-900" id="stat-total-paid">0</h3>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <p class="text-sm font-medium text-slate-500 mb-1">Pending Units</p>
-                <h3 class="text-3xl font-bold text-slate-400" id="stat-pending">0</h3>
-            </div>
         </div>
 
-        <!-- Main Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Interactive Grid Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
             <!-- Block A -->
-            <section>
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-3">
-                        <span class="w-2.5 h-8 bg-indigo-600 rounded-full"></span>
+            <section class="space-y-6">
+                <div class="flex items-center justify-between px-2">
+                    <h2 class="text-2xl font-black text-slate-800 flex items-center gap-3">
+                        <span class="w-3 h-10 bg-indigo-600 rounded-full shadow-lg shadow-indigo-200"></span>
                         Block A
                     </h2>
-                    <span class="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full uppercase tracking-widest">Ground + 5 + PH</span>
+                    <span class="px-4 py-1.5 bg-indigo-50 text-indigo-700 text-[10px] font-black rounded-full uppercase tracking-widest border border-indigo-100">G + 5 + PH</span>
                 </div>
-                <div class="space-y-6" id="block-a-grid"></div>
+                <div class="glass-card p-8 rounded-[2rem] space-y-8" id="block-a-grid"></div>
             </section>
 
             <!-- Block B -->
-            <section>
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-3">
-                        <span class="w-2.5 h-8 bg-amber-500 rounded-full"></span>
+            <section class="space-y-6">
+                <div class="flex items-center justify-between px-2">
+                    <h2 class="text-2xl font-black text-slate-800 flex items-center gap-3">
+                        <span class="w-3 h-10 bg-amber-500 rounded-full shadow-lg shadow-amber-200"></span>
                         Block B
                     </h2>
-                    <span class="text-[10px] font-bold bg-amber-50 text-amber-600 px-3 py-1 rounded-full uppercase tracking-widest">5 Floors + PH</span>
+                    <span class="px-4 py-1.5 bg-amber-50 text-amber-700 text-[10px] font-black rounded-full uppercase tracking-widest border border-amber-100">5 Floors + PH</span>
                 </div>
-                <div class="space-y-6" id="block-b-grid"></div>
+                <div class="glass-card p-8 rounded-[2rem] space-y-8" id="block-b-grid"></div>
             </section>
         </div>
 
-        <!-- Recent Payments -->
-        <section class="mt-16 bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-            <div class="p-8 border-b border-slate-50 flex items-center justify-between">
-                <h2 class="text-xl font-bold text-slate-900">Payment Ledger</h2>
-                <div class="text-xs text-slate-400 font-medium italic">Auto-syncs with database</div>
+        <!-- Payment Ledger Table -->
+        <section class="mt-16 glass-card rounded-[2.5rem] overflow-hidden">
+            <div class="p-8 border-b border-slate-100 flex items-center justify-between bg-white/50">
+                <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-3">
+                    <i data-lucide="list-ordered" class="w-5 h-5 text-indigo-600"></i>
+                    Recent Transaction Ledger
+                </h2>
+                <div class="hidden sm:block px-3 py-1 bg-slate-100 rounded-lg text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Real-time Updates</div>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
-                    <thead class="bg-slate-50/50 text-slate-500 text-[10px] uppercase font-bold tracking-widest">
-                        <tr>
-                            <th class="px-8 py-4">Flat No</th>
-                            <th class="px-8 py-4">Resident</th>
-                            <th class="px-8 py-4">Amount</th>
-                            <th class="px-8 py-4">Purpose</th>
-                            <th class="px-8 py-4">Payment Date</th>
+                    <thead>
+                        <tr class="bg-slate-50/50 text-slate-400 text-[10px] uppercase font-black tracking-widest">
+                            <th class="px-8 py-5">Unit</th>
+                            <th class="px-8 py-5">Resident Name</th>
+                            <th class="px-8 py-5">Amount Paid</th>
+                            <th class="px-8 py-5">Purpose</th>
+                            <th class="px-8 py-5 text-right">Date</th>
                         </tr>
                     </thead>
-                    <tbody id="payment-table-body" class="text-sm divide-y divide-slate-100">
-                        <!-- Loaded from Supabase -->
+                    <tbody id="payment-table-body" class="text-sm divide-y divide-slate-50">
+                        <!-- Dynamic Rows -->
                     </tbody>
                 </table>
             </div>
@@ -134,107 +208,107 @@
     <!-- Payment Modal -->
     <div id="payment-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl relative z-10 overflow-hidden">
-            <div class="p-6 bg-slate-900 text-white flex justify-between items-center">
-                <div>
-                    <h3 class="text-lg font-bold">Maintenance Fee</h3>
-                    <p class="text-slate-400 text-xs">Register payment in Supabase</p>
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden transform transition-all">
+            <div class="p-8 bg-slate-900 text-white relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-indigo-500/20 rounded-full blur-3xl"></div>
+                <div class="relative z-10 flex justify-between items-start">
+                    <div>
+                        <h3 class="text-2xl font-black">Register Payment</h3>
+                        <p class="text-slate-400 text-xs mt-1 font-medium">Updating Unit <span id="form-flat-display" class="text-indigo-400 font-bold">---</span></p>
+                    </div>
+                    <button onclick="closeModal()" class="bg-white/10 p-2 rounded-xl hover:bg-white/20 transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
                 </div>
-                <button onclick="closeModal()" class="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
             </div>
-            <div class="p-8 space-y-5">
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Selected Unit</label>
-                    <input type="text" id="form-flat-no" readonly class="w-full bg-slate-50 border-0 rounded-xl px-4 py-3 text-slate-900 font-bold focus:ring-0">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Resident Name</label>
-                    <input type="text" id="form-name" placeholder="Full name" class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Amount (₹)</label>
-                        <input type="number" id="form-amount" value="20000" class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none">
+            
+            <div class="p-8 space-y-6">
+                <div class="space-y-4">
+                    <div class="hidden">
+                        <input type="text" id="form-flat-no">
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Date</label>
-                        <input type="text" id="form-date" readonly class="w-full bg-slate-50 border-0 rounded-xl px-4 py-3 text-slate-500 font-medium">
+                    
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Resident Full Name</label>
+                        <div class="relative">
+                            <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300"></i>
+                            <input type="text" id="form-name" placeholder="Enter name" class="w-full pl-11 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl outline-none transition-all font-semibold">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount (₹)</label>
+                            <input type="number" id="form-amount" value="20000" class="w-full px-4 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl outline-none transition-all font-bold text-emerald-600">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</label>
+                            <input type="text" id="form-date" readonly class="w-full px-4 py-4 bg-slate-50 border-none rounded-2xl text-slate-400 font-medium cursor-not-allowed">
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Purpose</label>
+                        <select id="form-purpose" class="w-full px-4 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl outline-none transition-all font-semibold appearance-none">
+                            <option value="NEW LIFT">New Lift Installation</option>
+                            <option value="Lift Maintenance">Routine Lift Maintenance</option>
+                            <option value="General Maintenance">General Maintenance</option>
+                            <option value="Water/Electricity">Water & Electricity</option>
+                        </select>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Purpose</label>
-                    <input type="text" id="form-purpose" value="Lift Maintenance" class="w-full border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
-                <button onclick="savePayment()" id="save-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-xl shadow-indigo-100 transition-all flex items-center justify-center gap-2 group">
-                    <span id="btn-text">Confirm Payment</span>
-                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+
+                <button onclick="savePayment()" id="save-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-5 rounded-[1.5rem] shadow-xl shadow-indigo-100 transition-all active:scale-[0.98] flex items-center justify-center gap-3">
+                    <span id="btn-text">Confirm Transaction</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Notification -->
-    <div id="toast" class="fixed bottom-8 right-8 z-[100] transform translate-y-20 opacity-0 transition-all duration-300">
-        <div class="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4">
-            <div class="bg-indigo-500 p-1.5 rounded-lg">
-                <i data-lucide="bell" class="w-4 h-4"></i>
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-8 right-8 z-[100] transform translate-y-32 opacity-0 transition-all duration-500">
+        <div class="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-white/10">
+            <div class="bg-indigo-500 p-2 rounded-xl">
+                <i data-lucide="check" class="w-4 h-4"></i>
             </div>
-            <span id="toast-message" class="font-medium text-sm">Action successful</span>
+            <span id="toast-message" class="font-bold text-sm tracking-tight">Record Updated</span>
         </div>
     </div>
 
     <script>
-        // Supabase Client Initialization - Fixed naming conflict
-        const SUPABASE_URL = "https://osurdrpjngdngnvwrmot.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zdXJkcnBqbmdkbmdudndybW90Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3MDgzMzYsImV4cCI6MjA4NjI4NDMzNn0.1Cp3N-oBVwH5fLI-iXXvzg4_0crniMkiGzJTSfBshTM";
+        // Supabase Configuration
+        const SUPABASE_URL = "https://oodifjlbetvtsxwfmzfu.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vZGlmamxiZXR2dHN4d2ZtemZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNzQwNTksImV4cCI6MjA4OTg1MDA1OX0.E8Tvomr4A4Ht0aHJ5C9-cWXPLNnb0EDUxdCIH-MzrJI";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let payments = {};
-        const blocksConfig = {
+        const MAX_UNITS = 86; // A (45) + B (41)
+
+        const config = {
             'A': { hasGround: true, floors: 5, flatsPerFloor: 8, hasPenthouse: true },
             'B': { hasGround: false, floors: 5, flatsPerFloor: 8, hasPenthouse: true }
         };
 
-        // Initialize UI
         window.onload = () => {
-            renderApp(); // Render the structure immediately
             lucide.createIcons();
             fetchPayments();
             subscribeToChanges();
         };
 
-        // Real-time Subscription
         function subscribeToChanges() {
-            supabaseClient
-                .channel('public:payments')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'payments' }, () => {
-                    fetchPayments();
-                })
+            supabaseClient.channel('public:payments')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'payments' }, fetchPayments)
                 .subscribe();
         }
 
         async function fetchPayments() {
-            const { data, error } = await supabaseClient
-                .from('payments')
-                .select('*');
-
-            if (error) {
-                console.error('Error fetching:', error);
-                return;
-            }
+            const { data, error } = await supabaseClient.from('payments').select('*');
+            if (error) return console.error(error);
 
             payments = {};
             data.forEach(p => {
-                payments[p.flat_no] = {
-                    flatNo: p.flat_no,
-                    name: p.resident_name,
-                    amount: p.amount,
-                    purpose: p.purpose,
-                    date: p.payment_date,
-                    block: p.block
-                };
+                payments[p.flat_no] = { ...p, flatNo: p.flat_no };
             });
 
             renderApp();
@@ -243,7 +317,6 @@
 
         async function savePayment() {
             const saveBtn = document.getElementById('save-btn');
-            const btnText = document.getElementById('btn-text');
             const flatNo = document.getElementById('form-flat-no').value;
             const name = document.getElementById('form-name').value;
             const amount = parseFloat(document.getElementById('form-amount').value);
@@ -251,234 +324,218 @@
             const date = document.getElementById('form-date').value;
             const block = flatNo.includes('B') ? 'B' : 'A';
 
-            if (!name) return showToast("Please enter a name", "error");
+            if (!name) return showToast("Please enter resident name", true);
 
             saveBtn.disabled = true;
-            btnText.textContent = "Processing...";
+            document.getElementById('btn-text').textContent = "Syncing...";
 
-            const { error } = await supabaseClient
-                .from('payments')
-                .upsert({
-                    flat_no: flatNo,
-                    resident_name: name,
-                    amount: amount,
-                    purpose: purpose,
-                    payment_date: date,
-                    block: block
-                }, { onConflict: 'flat_no' });
+            const { error } = await supabaseClient.from('payments').upsert({
+                flat_no: flatNo, resident_name: name, amount, purpose, block, payment_date: date
+            }, { onConflict: 'flat_no' });
 
-            if (error) {
-                console.error('Save Error:', error);
-                showToast("Connection error", "error");
-            } else {
-                showToast(`Payment recorded for ${flatNo}`);
+            if (!error) {
+                showToast("Payment record saved successfully");
                 closeModal();
-                fetchPayments();
+            } else {
+                showToast("Sync Error", true);
             }
-
             saveBtn.disabled = false;
-            btnText.textContent = "Confirm Payment";
-        }
-
-        function generateFlatGrid(blockKey, containerId) {
-            const config = blocksConfig[blockKey];
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-
-            // Penthouse
-            if (config.hasPenthouse) {
-                const phGrid = createFloorRow(`Penthouse`);
-                phGrid.appendChild(createFlatCell(`PH-${blockKey}`));
-                container.appendChild(phGrid.closest('.space-y-2'));
-            }
-
-            // Floors
-            for (let f = config.floors; f >= 1; f--) {
-                const floorGrid = createFloorRow(`Floor ${f}`);
-                for (let i = 1; i <= config.flatsPerFloor; i++) {
-                    floorGrid.appendChild(createFlatCell(`${blockKey}${f}0${i}`));
-                }
-                container.appendChild(floorGrid.closest('.space-y-2'));
-            }
-
-            // Ground
-            if (config.hasGround) {
-                const groundGrid = createFloorRow(`Ground`);
-                for (let i = 1; i <= 4; i++) {
-                    groundGrid.appendChild(createFlatCell(`G${blockKey}10${i}`));
-                }
-                container.appendChild(groundGrid.closest('.space-y-2'));
-            }
-        }
-
-        function createFloorRow(label) {
-            const wrapper = document.createElement('div');
-            wrapper.className = "space-y-2";
-            const labelEl = document.createElement('span');
-            labelEl.className = "text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pl-1";
-            labelEl.textContent = label;
-            wrapper.appendChild(labelEl);
-            const grid = document.createElement('div');
-            grid.className = "grid grid-cols-4 sm:grid-cols-8 gap-2.5";
-            wrapper.appendChild(grid);
-            return grid;
-        }
-
-        function createFlatCell(flatId) {
-            const p = payments[flatId];
-            const btn = document.createElement('button');
-            btn.className = `flat-cell h-14 rounded-xl border-2 flex flex-col items-center justify-center text-[11px] font-bold shadow-sm transition-all
-                ${p 
-                    ? 'bg-emerald-50 border-emerald-500 text-emerald-700' 
-                    : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-400 hover:text-indigo-600'}`;
-            
-            btn.innerHTML = `<span>${flatId}</span>${p ? '<i data-lucide="check" class="w-3 h-3 mt-1"></i>' : ''}`;
-            btn.onclick = () => openPaymentModal(flatId);
-            return btn;
+            document.getElementById('btn-text').textContent = "Confirm Transaction";
         }
 
         function renderApp() {
-            generateFlatGrid('A', 'block-a-grid');
-            generateFlatGrid('B', 'block-b-grid');
+            renderGrid('A', 'block-a-grid');
+            renderGrid('B', 'block-b-grid');
             
             const tbody = document.getElementById('payment-table-body');
             tbody.innerHTML = '';
             
-            const sortedPayments = Object.values(payments).sort((a,b) => b.flatNo.localeCompare(a.flatNo));
+            const sorted = Object.values(payments).sort((a,b) => b.id - a.id); // Show latest first
             
-            sortedPayments.forEach(p => {
-                const tr = document.createElement('tr');
-                tr.className = "group hover:bg-slate-50 transition-colors";
-                tr.innerHTML = `
-                    <td class="px-8 py-5 font-bold text-indigo-600">${p.flatNo}</td>
-                    <td class="px-8 py-5 font-semibold text-slate-800">${p.name}</td>
-                    <td class="px-8 py-5 text-emerald-600 font-bold">₹${parseFloat(p.amount).toLocaleString()}</td>
-                    <td class="px-8 py-5 text-slate-500 font-medium">${p.purpose}</td>
-                    <td class="px-8 py-5 text-slate-400 text-xs">${p.date}</td>
+            sorted.forEach(p => {
+                tbody.innerHTML += `
+                    <tr class="group hover:bg-slate-50/80 transition-colors">
+                        <td class="px-8 py-5 font-black text-indigo-600">${p.flat_no}</td>
+                        <td class="px-8 py-5 font-bold text-slate-700">${p.resident_name}</td>
+                        <td class="px-8 py-5">
+                            <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full font-extrabold text-xs">
+                                ₹${parseFloat(p.amount).toLocaleString()}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5 text-slate-500 font-medium italic">${p.purpose}</td>
+                        <td class="px-8 py-5 text-right font-bold text-slate-400 text-xs">${p.payment_date}</td>
+                    </tr>
                 `;
-                tbody.appendChild(tr);
             });
             lucide.createIcons();
         }
 
-        function updateStats() {
-            let total = 0, aTot = 0, bTot = 0;
-            const paid = Object.keys(payments).length;
-            
-            Object.values(payments).forEach(p => {
-                const amt = parseFloat(p.amount);
-                total += amt;
-                if (p.block === 'A') aTot += amt;
-                else bTot += amt;
-            });
+        function renderGrid(blockKey, containerId) {
+            const cont = document.getElementById(containerId);
+            const cfg = config[blockKey];
+            cont.innerHTML = '';
 
-            document.getElementById('stat-total-amount').textContent = `₹${total.toLocaleString()}`;
-            document.getElementById('stat-total-paid').textContent = paid;
+            if (cfg.hasPenthouse) cont.appendChild(createRow('Penthouse', [`PH-${blockKey}`], blockKey));
             
-            // Calc: (5*8 + 1 + 4) for A + (5*8 + 1) for B = 45 + 41 = 86
-            let possible = 86; 
-            document.getElementById('stat-pending').textContent = Math.max(0, possible - paid);
+            for (let f = cfg.floors; f >= 1; f--) {
+                let flats = [];
+                for (let i = 1; i <= cfg.flatsPerFloor; i++) flats.push(`${blockKey}${f}0${i}`);
+                cont.appendChild(createRow(`Floor ${f}`, flats, blockKey));
+            }
+
+            if (cfg.hasGround) {
+                cont.appendChild(createRow('Ground', ['GA101','GA102','GA103', 'GA104'], blockKey));
+            }
+        }
+
+        function createRow(label, flatIds, block) {
+            const wrap = document.createElement('div');
+            wrap.className = "space-y-3";
+            wrap.innerHTML = `<span class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] pl-1">${label}</span>`;
+            
+            const grid = document.createElement('div');
+            grid.className = "grid grid-cols-4 sm:grid-cols-8 gap-3";
+            
+            flatIds.forEach(id => {
+                const p = payments[id];
+                const btn = document.createElement('button');
+                
+                // UNIFIED PAID COLOR: Emerald (Green) for all paid flats, white/neutral for unpaid
+                btn.className = `flat-cell h-16 rounded-[1.25rem] border-2 flex flex-col items-center justify-center font-black transition-all ${p 
+                    ? `bg-emerald-50 border-emerald-500 text-emerald-700 shadow-md shadow-emerald-100` 
+                    : 'bg-white border-slate-100 text-slate-300 hover:border-indigo-400 hover:text-indigo-600'}`;
+                
+                btn.innerHTML = `<span class="text-[11px]">${id}</span>${p ? `<i data-lucide="check-circle-2" class="w-3.5 h-3.5 mt-1"></i>` : ''}`;
+                btn.onclick = () => openModal(id);
+                grid.appendChild(btn);
+            });
+            
+            wrap.appendChild(grid);
+            return wrap;
+        }
+
+        function updateStats() {
+            const arr = Object.values(payments);
+            const total = arr.reduce((s, p) => s + parseFloat(p.amount), 0);
+            const aTot = arr.filter(p => p.block === 'A').reduce((s, p) => s + parseFloat(p.amount), 0);
+            const bTot = arr.filter(p => p.block === 'B').reduce((s, p) => s + parseFloat(p.amount), 0);
+            
+            document.getElementById('stat-total-amount').textContent = `₹${total.toLocaleString()}`;
+            document.getElementById('stat-total-paid').textContent = arr.length;
+            document.getElementById('stat-pending').textContent = MAX_UNITS - arr.length;
+
+            const progress = Math.round((arr.length / MAX_UNITS) * 100);
+            document.getElementById('collection-progress-bar').style.width = `${progress}%`;
+            document.getElementById('collection-percent').textContent = `${progress}%`;
 
             document.getElementById('breakdown-details').innerHTML = `
-                <div class="flex justify-between items-center"><span class="text-slate-400">Block A</span> <span class="font-bold">₹${aTot.toLocaleString()}</span></div>
-                <div class="flex justify-between items-center"><span class="text-slate-400">Block B</span> <span class="font-bold">₹${bTot.toLocaleString()}</span></div>
-                <div class="pt-2 mt-2 border-t border-slate-700 flex justify-between items-center">
-                    <span class="text-slate-400 italic">Progress</span>
-                    <span class="text-emerald-400 font-bold">${Math.round((paid/possible)*100)}%</span>
-                </div>
+                <div class="flex justify-between"><span>Block A:</span><span class="text-indigo-600 font-black">₹${aTot.toLocaleString()}</span></div>
+                <div class="flex justify-between"><span>Block B:</span><span class="text-amber-600 font-black">₹${bTot.toLocaleString()}</span></div>
             `;
         }
 
-        window.openPaymentModal = (flatId) => {
-            const modal = document.getElementById('payment-modal');
-            const data = payments[flatId] || {};
-            document.getElementById('form-flat-no').value = flatId;
-            document.getElementById('form-name').value = data.name || '';
-            document.getElementById('form-amount').value = data.amount || 20000;
-            document.getElementById('form-purpose').value = data.purpose || 'Lift Maintenance';
-            document.getElementById('form-date').value = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
-            modal.classList.remove('hidden');
+        window.openModal = (id) => {
+            const p = payments[id] || {};
+            document.getElementById('form-flat-no').value = id;
+            document.getElementById('form-flat-display').textContent = id;
+            document.getElementById('form-name').value = p.resident_name || '';
+            document.getElementById('form-amount').value = p.amount || 20000;
+            document.getElementById('form-purpose').value = p.purpose || 'NEW LIFT';
+            document.getElementById('form-date').value = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            
+            document.getElementById('payment-modal').classList.remove('hidden');
             document.getElementById('form-name').focus();
         };
 
         window.closeModal = () => document.getElementById('payment-modal').classList.add('hidden');
 
-        window.showToast = (msg) => {
-            const toast = document.getElementById('toast');
+        window.showToast = (msg, isError = false) => {
+            const t = document.getElementById('toast');
             document.getElementById('toast-message').textContent = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+            t.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => t.classList.add('translate-y-32', 'opacity-0'), 3000);
         };
 
         window.exportToPDF = () => {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = doc.internal.pageSize.getWidth();
             
-            // Header
+            // Branding Header
+            doc.setFillColor(30, 41, 59);
+            doc.rect(0, 0, pageWidth, 40, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(20);
-            doc.setTextColor(30, 41, 59); // Slate-800
-            doc.text("Apartment Maintenance Collection Report", 14, 20);
+            doc.text("Maintenance Collection Report", 14, 20);
             
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
-            doc.setTextColor(100);
-            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
+            doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`, 14, 28);
+            doc.text("System: Supabase Live Sync | Apartment Management", 14, 33);
 
-            const allPayments = Object.values(payments);
-            const paymentsA = allPayments.filter(p => p.block === 'A').sort((a,b) => a.flatNo.localeCompare(b.flatNo));
-            const paymentsB = allPayments.filter(p => p.block === 'B').sort((a,b) => a.flatNo.localeCompare(b.flatNo));
+            const all = Object.values(payments);
+            const blockA = all.filter(p => p.block === 'A').sort((a,b) => a.flat_no.localeCompare(b.flat_no));
+            const blockB = all.filter(p => p.block === 'B').sort((a,b) => a.flat_no.localeCompare(b.flat_no));
+
+            let currentY = 50;
 
             // Block A Section
-            doc.setFontSize(14);
+            doc.setTextColor(79, 70, 229);
+            doc.setFontSize(16);
             doc.setFont("helvetica", "bold");
-            doc.setTextColor(79, 70, 229); // Indigo-600
-            doc.text("Block A Payments", 14, 42);
-            
+            doc.text("Block A Payments", 14, currentY);
+
             doc.autoTable({
-                startY: 47,
-                head: [['Flat', 'Resident Name', 'Amount', 'Purpose', 'Date']],
-                body: paymentsA.map(p => [p.flatNo, p.name, `Rs. ${parseFloat(p.amount).toLocaleString()}`, p.purpose, p.date]),
-                headStyles: { fillColor: [79, 70, 229] },
-                alternateRowStyles: { fillColor: [245, 247, 250] },
-                margin: { left: 14, right: 14 }
+                startY: currentY + 5,
+                head: [['Flat No', 'Resident Name', 'Amount', 'Purpose', 'Payment Date']],
+                body: blockA.map(p => [p.flat_no, p.resident_name, `Rs. ${p.amount.toLocaleString()}`, p.purpose, p.payment_date]),
+                headStyles: { fillColor: [79, 70, 229], textColor: [255, 255, 255], fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [248, 250, 252] },
+                margin: { left: 14, right: 14 },
+                styles: { fontSize: 9 }
             });
 
-            let finalY = doc.lastAutoTable.finalY || 47;
-            const subtotalA = paymentsA.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+            currentY = doc.lastAutoTable.finalY + 10;
+            const aTot = blockA.reduce((s,p) => s + p.amount, 0);
+            doc.setTextColor(50, 50, 50);
             doc.setFontSize(10);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(50);
-            doc.text(`Block A Total: Rs. ${subtotalA.toLocaleString()}`, 14, finalY + 8);
+            doc.text(`Block A Subtotal: Rs. ${aTot.toLocaleString()}`, 14, currentY);
 
             // Block B Section
-            doc.setFontSize(14);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(217, 119, 6); // Amber-600
-            doc.text("Block B Payments", 14, finalY + 20);
+            currentY += 15;
+            if (currentY > 250) { doc.addPage(); currentY = 20; }
             
+            doc.setTextColor(217, 119, 6); // Amber-600
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "bold");
+            doc.text("Block B Payments", 14, currentY);
+
             doc.autoTable({
-                startY: finalY + 25,
-                head: [['Flat', 'Resident Name', 'Amount', 'Purpose', 'Date']],
-                body: paymentsB.map(p => [p.flatNo, p.name, `Rs. ${parseFloat(p.amount).toLocaleString()}`, p.purpose, p.date]),
-                headStyles: { fillColor: [245, 158, 11] },
+                startY: currentY + 5,
+                head: [['Flat No', 'Resident Name', 'Amount', 'Purpose', 'Payment Date']],
+                body: blockB.map(p => [p.flat_no, p.resident_name, `Rs. ${p.amount.toLocaleString()}`, p.purpose, p.payment_date]),
+                headStyles: { fillColor: [245, 158, 11], textColor: [255, 255, 255], fontStyle: 'bold' },
                 alternateRowStyles: { fillColor: [255, 251, 235] },
-                margin: { left: 14, right: 14 }
+                margin: { left: 14, right: 14 },
+                styles: { fontSize: 9 }
             });
 
-            finalY = doc.lastAutoTable.finalY || finalY + 25;
-            const subtotalB = paymentsB.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+            currentY = doc.lastAutoTable.finalY + 10;
+            const bTot = blockB.reduce((s,p) => s + p.amount, 0);
+            doc.setTextColor(50, 50, 50);
             doc.setFontSize(10);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(50);
-            doc.text(`Block B Total: Rs. ${subtotalB.toLocaleString()}`, 14, finalY + 8);
+            doc.text(`Block B Subtotal: Rs. ${bTot.toLocaleString()}`, 14, currentY);
 
-            // Grand Total
-            const grandTotal = allPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+            // Grand Total Footer
+            currentY += 20;
+            doc.setFillColor(5, 150, 105); // Emerald-600
+            doc.rect(14, currentY - 8, 182, 15, 'F');
+            doc.setTextColor(255, 255, 255);
             doc.setFontSize(14);
             doc.setFont("helvetica", "bold");
-            doc.setTextColor(5, 150, 105); // Emerald-600
-            doc.text(`Grand Total Collection: Rs. ${grandTotal.toLocaleString()}`, 14, finalY + 25);
+            doc.text(`Grand Total Collection: Rs. ${(aTot + bTot).toLocaleString()}`, pageWidth / 2, currentY + 1, { align: 'center' });
 
             doc.save(`Apartment_Maintenance_Report_${Date.now()}.pdf`);
         };
